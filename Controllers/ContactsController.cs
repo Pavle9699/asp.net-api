@@ -22,7 +22,20 @@ namespace ContactsAPI.Controllers
             return Ok(await dbContext.Contacts.ToListAsync());
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetContact([FromRoute] Guid id)
+        {
+            var contact = await dbContext.Contacts.FindAsync(id);
+
+            if(contact == null)
+            {
+                return NotFound();
+            }
+            return Ok(contact);
+        }
+
         [HttpPost]
+        [Route ("{id:guid}")]
         public async Task<IActionResult> AddContact(AddContactRequest addContactRequest)// zbog asynca iaction wrapovan u task
         {
             var contact = new Contact()
@@ -61,6 +74,22 @@ namespace ContactsAPI.Controllers
             }
 
             return NotFound();
+        }
+
+        [HttpDelete]
+        [Route("id:guid")]
+        public async Task<IActionResult> DeleteContact([FromRoute] Guid id)
+        {
+            var contact = await dbContext.Contacts.FindAsync(id);
+
+            if(contact != null)
+            {
+                dbContext.Remove(contact);
+                await dbContext.SaveChangesAsync();
+                return Ok(contact);
+            }
+            return NotFound();
+
         }
 
     }
